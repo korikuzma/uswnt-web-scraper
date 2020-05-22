@@ -35,9 +35,19 @@ for player in players:
     for s in more_stats:
         temp.append(s.text)
 
+    num_wc = 0
+    wc = stat_results.find('div', class_='HighlightStats-module__starContainer--3J-I7')
+    if(wc is not None):
+        wc_stars = wc.findChildren("svg" , recursive=False)
+        num_wc = len(wc_stars)
+
     print("Appearances", temp[0])
-    print("Goals", temp[1])
     if(not is_goal_keeper):
+        print("Goals", temp[1])
         print("Assists", temp[2])
+    else:
+        print("Clean Sheets", temp[1])
+
+    print("World Cups", num_wc)
     print()
 
