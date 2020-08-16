@@ -105,10 +105,10 @@ def max_arg(key):
 # Ask user if they would like to view stats
 def find_max():
     max_input = input("Would you like to know the player with the highest stats in a category? y/n ")
-    while(max_input.lower() == 'y'):
+    while(max_input.lower().strip() == 'y'):
         while True:
             find_max = input("Enter goals, appearances, assists, or clean_sheets to find the player with the max. : ")
-            find_max = find_max.lower()
+            find_max = find_max.lower().strip()
             if((find_max == "goals") | (find_max == "appearances") | (find_max == "assists") | (find_max == "clean_sheets")):
                 max_arg(find_max.lower())
                 max_input = input("Do you want to know another? y/n ")
@@ -116,10 +116,10 @@ def find_max():
             else:
                 print("Error: Invalid input. Try again.")
 
-# Print all players with background info sorted by number
+# Print all players with  info sorted by number
 def display_all_players():
-    display_input = input("Would you like to display all the players background information? y/n ")
-    if(display_input.lower() == 'y'):
+    display_input = input("Would you like to display all the players information? y/n ")
+    if(display_input.lower().strip() == 'y'):
         for doc in collection.find().sort("number"):
             print (doc["fname"], doc["lname"])
             print("Number:", doc["number"])
@@ -130,6 +130,37 @@ def display_all_players():
             print("Club:", doc["club"])
             print()
 
+# Display individual player's stats and background info
+def display_player():
+    player_input = input("Would you like to know the player with the highest stats in a category? y/n ")
+    while(player_input.lower().strip() == 'y'):
+        while True:
+            try:
+                lname_input = input("Enter the last name of the player you'd like to see: ")
+                query = {"lname": lname_input.title().strip()}
+                doc = collection.find_one(query)
+                print (doc["fname"], doc["lname"])
+                print("Number:", doc["number"])
+                print("Position:", doc["position"])
+                print("Appearances:", doc["appearances"])
+
+                # Goalies have different fields
+                if(doc["position"] != "Goalkeeper"):
+                    print("Goals:", doc["goals"])
+                    print("Assists:", doc["assists"])
+                else:
+                    print("Clean Sheets:", doc["clean_sheets"])
+
+                print("Club:", doc["club"])
+                print("Hometown:", doc["hometown"])
+                print("Birthday:", doc["dob"])
+                print("Height:", doc["height"])
+                print()
+                player_input = input("Would you like to know another the player with the highest stats in a category? y/n ")
+                break
+            except:
+                print("Invalid last name of player")
+
 if __name__ == "__main__":
 
     while True:
@@ -137,7 +168,7 @@ if __name__ == "__main__":
             username = input("Enter username: ")
             password = input("Enter password: ")
 
-            cluster = MongoClient(f"mongodb+srv://{username}:{password}@cluster0.dz1fr.mongodb.net/uswnt?ssl=true&ssl_cert_reqs=CERT_NONE&retryWrites=true&w=majority")
+            cluster = MongoClient(f"mongodb+srv://{username.strip()}:{password.strip()}@cluster0.dz1fr.mongodb.net/uswnt?ssl=true&ssl_cert_reqs=CERT_NONE&retryWrites=true&w=majority")
 
             db = cluster["uswnt"]
             collection = db["players"]
@@ -154,5 +185,6 @@ if __name__ == "__main__":
 
     display_all_players()
     find_max()
+    display_player()
 
     print("Goodbye!")
