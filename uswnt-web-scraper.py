@@ -116,6 +116,20 @@ def find_max():
             else:
                 print("Error: Invalid input. Try again.")
 
+# Print all players with background info sorted by number
+def display_all_players():
+    display_input = input("Would you like to display all the players background information? y/n ")
+    if(display_input.lower() == 'y'):
+        for doc in collection.find().sort("number"):
+            print (doc["fname"], doc["lname"])
+            print("Number:", doc["number"])
+            print("Position:", doc["position"])
+            print("Hometown:", doc["hometown"])
+            print("Birthday:", doc["dob"])
+            print("Height:", doc["height"])
+            print("Club:", doc["club"])
+            print()
+
 if __name__ == "__main__":
 
     while True:
@@ -138,6 +152,7 @@ if __name__ == "__main__":
     print("Finished updating database")
     print()
 
+    display_all_players()
     find_max()
 
     print("Goodbye!")
