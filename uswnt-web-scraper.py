@@ -29,9 +29,9 @@ def get_player_url(lname, fname):
 def update_db(position, number, fname, lname, dob, hometown, height, club, appearances, goals, assists, clean_sheets, world_cups):
         doc = None
         if(position != "Goalkeeper"):
-            doc = {"_id": number, "backround":{"fname": fname, "lname": lname, "position": position, "number": number, "dob": dob, "hometown": hometown, "height": height, "club": club}, "stats": {"appearances": appearances, "goals": goals, "assists": assists, "world_cups": world_cups} }
+            doc = {"_id": number, "fname": fname, "lname": lname, "position": position, "number": int(number), "dob": dob, "hometown": hometown, "height": height, "club": club, "appearances": int(appearances), "goals": int(goals), "assists": int(assists), "world_cups": int(world_cups)}
         else:
-            doc = {"_id": number, "backround":{"fname": fname, "lname": lname, "position": position, "number": number, "dob": dob, "hometown": hometown, "height": height, "club": club}, "stats": {"appearances": appearances, "clean_sheets": clean_sheets, "world_cups": world_cups} }
+            doc = {"_id": number, "fname": fname, "lname": lname, "position": position, "number": int(number), "dob": dob, "hometown": hometown, "height": height, "club": club, "appearances": int(appearances), "clean_sheets": int(clean_sheets), "world_cups": int(world_cups)}
 
         collection.update_one({"_id": number},{"$set" :doc}, upsert=True)
 
@@ -97,21 +97,47 @@ def get_player_info(players):
 
         update_db(position, number, fname, lname, dob, hometown, height, club, appearances, goals, assists, clean_sheets, world_cups)
 
+# Retreive the max key from the database
+def max_arg(key):
+    max_key = collection.find_one(sort=[(key, -1)])
+    print(max_key["fname"], max_key["lname"], ":" ,max_key[key], key)
+
+# Ask user if they would like to view stats
+def find_max():
+    max_input = input("Would you like to know the player with the highest stats in a category? y/n ")
+    while(max_input.lower() == 'y'):
+        while True:
+            find_max = input("Enter goals, appearances, assists, or clean_sheets to find the player with the max. : ")
+            find_max = find_max.lower()
+            if((find_max == "goals") | (find_max == "appearances") | (find_max == "assists") | (find_max == "clean_sheets")):
+                max_arg(find_max.lower())
+                max_input = input("Do you want to know another? y/n ")
+                break
+            else:
+                print("Error: Invalid input. Try again.")
 
 if __name__ == "__main__":
-    username = input("Enter username: ")
-    password = input("Enter password: ")
 
-    cluster = MongoClient(f"mongodb+srv://{username}:{password}@cluster0.dz1fr.mongodb.net/uswnt?ssl=true&ssl_cert_reqs=CERT_NONE&retryWrites=true&w=majority")
+    while True:
+        try:
+            username = input("Enter username: ")
+            password = input("Enter password: ")
 
-    db = cluster["uswnt"]
-    collection = db["players"]
+            cluster = MongoClient(f"mongodb+srv://{username}:{password}@cluster0.dz1fr.mongodb.net/uswnt?ssl=true&ssl_cert_reqs=CERT_NONE&retryWrites=true&w=majority")
 
-    print()
-    print("Updating database...")
+            db = cluster["uswnt"]
+            collection = db["players"]
 
-    players = get_players_div()
-    get_player_info(players)
+            players = get_players_div()
+            get_player_info(players)
 
-    print()
+            break
+        except (pymongo.errors.OperationFailure, pymongo.errors.ConfigurationError):
+            print("Wrong username and/or password.")
+
     print("Finished updating database")
+    print()
+
+    find_max()
+
+    print("Goodbye!")
